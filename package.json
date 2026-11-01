@@ -21,15 +21,15 @@
   },
   "files": [
     "agents/",
-    "skills/",
+    "prompts/",
     "LICENSE",
     "NOTICE",
     "README.md",
     "CHANGELOG.md"
   ],
   "pi": {
-    "skills": [
-      "./skills"
+    "prompts": [
+      "./prompts"
     ],
     "subagents": {
       "agents": [

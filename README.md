@@ -1,8 +1,8 @@
 # pi-pr-review-toolkit
 
-Claude Code's [pr-review-toolkit](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit) review agents and `/review-pr` workflow, packaged for [Pi](https://github.com/earendil-works/pi) and [pi-subagents](https://github.com/nicobailon/pi-subagents).
+Claude Code's [pr-review-toolkit](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit) review agents and `/review-pr` command, packaged for [Pi](https://github.com/earendil-works/pi) and [pi-subagents](https://github.com/nicobailon/pi-subagents).
 
-This package contains no code, only agent definitions, one skill, and documentation.
+This package contains no code, only agent definitions, one prompt template, and documentation.
 
 | Agent | Looks at | Output |
 |---|---|---|
@@ -13,7 +13,7 @@ This package contains no code, only agent definitions, one skill, and documentat
 | `type-design-analyzer` | Type invariants and encapsulation | Four ratings, 1-10 each |
 | `code-simplifier` | Clarity and consistency, preserving behavior | **Edits files** in the given scope |
 
-> **한국어 요약:** Claude Code의 pr-review-toolkit 리뷰 에이전트 6개와 `/review-pr` 흐름을 Pi(pi-subagents)에서 쓰게 해 주는 패키지입니다. pi-subagents를 먼저 설치한 뒤 `pi install npm:pi-pr-review-toolkit`으로 설치하고, "PR 리뷰해줘" 또는 `/skill:pr-review`로 실행합니다. 기본은 병렬 실행이고, `sequential`을 붙이면 하나씩 실행합니다. 리뷰어 5개는 읽기 전용이고, `code-simplifier`는 리뷰가 끝난 뒤 단독으로 실행되어 코드를 직접 고칩니다. 모델은 패키지에 고정되어 있지 않으므로 아래 "Recommended model settings"처럼 `agentOverrides`로 지정하세요.
+> **한국어 요약:** Claude Code의 pr-review-toolkit 리뷰 에이전트 6개와 `/review-pr` 명령을 Pi(pi-subagents)에서 쓰게 해 주는 패키지입니다. pi-subagents를 먼저 설치한 뒤 `pi install npm:pi-pr-review-toolkit`으로 설치하고, `/review-pr`로 실행합니다(예: `/review-pr tests errors`, `/review-pr all parallel`). 리뷰어 5개는 읽기 전용이고, `code-simplifier`는 코드를 직접 고칩니다. 모델은 패키지에 고정되어 있지 않으므로 아래 "Recommended model settings"처럼 `agentOverrides`로 지정하세요.
 
 ## Requirements
 
@@ -42,20 +42,19 @@ Check that the agents are registered: `/subagents`, or ask the agent to run `sub
 
 ## Usage
 
-The `pr-review` skill is the entry point. It is the upstream `/review-pr` command, verbatim.
+The `/review-pr` prompt template is the entry point. It is the upstream `/review-pr` command, verbatim. Pi substitutes your arguments for `$ARGUMENTS`, as Claude Code does.
 
 | You type | What runs |
 |---|---|
-| `Review this PR` / `PR 리뷰해줘` | Applicable reviewers, in parallel (if the skill loads automatically) |
-| `/skill:pr-review` | Same, but forces the skill to load |
-| `/skill:pr-review tests errors` | Only `pr-test-analyzer` and `silent-failure-hunter` |
-| `/skill:pr-review sequential` | Applicable reviewers, one at a time |
-| `/skill:pr-review simplify` | `code-simplifier` on the changed files (edits them) |
-| `/skill:pr-review code against main` | `code-reviewer` on `git diff main...HEAD` |
+| `/review-pr` | All applicable reviewers |
+| `/review-pr tests errors` | Only `pr-test-analyzer` and `silent-failure-hunter` |
+| `/review-pr comments` | Only `comment-analyzer` |
+| `/review-pr simplify` | `code-simplifier` (edits files) |
+| `/review-pr all parallel` | All applicable reviewers at once |
 
-Aspects: `code`, `errors`, `tests`, `comments`, `types`, `simplify`, `all` (default). The selected reviewers run in parallel; add `sequential` to run them one at a time.
+Aspects: `code`, `errors`, `tests`, `comments`, `types`, `simplify`, `all` (default). The command runs agents one at a time unless you add `parallel`.
 
-**Scope.** The skill follows upstream `/review-pr`: it looks at `git status`, `git diff`, and `gh pr view`. Name files, a base branch, or a PR in your request to review something else.
+**Scope.** As upstream: the command looks at `git status`, `git diff --name-only`, and `gh pr view`.
 
 **Result.** A `# PR Review Summary` with Critical, Important, Suggestions, Strengths, and Recommended Action. Each finding is tagged with the agent and `file:line`.
 
@@ -85,7 +84,7 @@ Use model ids from your registry (`provider/id` or `id`). Claude Code aliases su
 Other useful overrides (`agentOverrides.<name>`):
 
 - `"disabled": true` hides an agent.
-- `"advertise": true` lists an agent in the parent's system prompt, so it can be picked without the skill.
+- `"advertise": true` lists an agent in the parent's system prompt, so the parent can pick it without `/review-pr`.
 
 ## Customizing an agent
 
@@ -97,17 +96,16 @@ subagent({ action: "eject", agent: "code-reviewer" })
 
 ## Differences from Claude Code
 
+- **Command name:** `/review-pr` instead of `/pr-review-toolkit:review-pr`.
 - **Models:** no model in frontmatter; Claude Code aliases (`opus`, `inherit`) are not used. Configure with `agentOverrides`.
-- **Invocation:** the agents are not advertised and Pi does not launch them proactively. Use the `pr-review` skill or ask for an agent by name. pi-subagents only delegates when you ask, and invoking the skill counts as asking.
+- **Invocation:** the agents are not advertised and Pi does not launch them proactively. Use `/review-pr` or ask for an agent by name.
 - **Project instructions:** agents receive the project's AGENTS.md/CLAUDE.md (`inheritProjectContext: true`), and "CLAUDE.md" in the prompts also means AGENTS.md.
 - **Tools:** reviewers get `read, grep, find, ls, bash`; `code-simplifier` also gets `edit, write`. Reviewers are told to use bash read-only. This is an instruction, not a sandbox.
-- **Workflow:** reviewers run in parallel by default (upstream's text defaults to sequential, with `parallel` on request); use `sequential` for one at a time. `code-simplifier` runs alone, after the reviewers. `code-reviewer` also reviews staged changes by default.
-- **Prompt patches (P1-P6):** project-specific rules in `silent-failure-hunter` (Sentry, Statsig, `errorIds.ts`) and `code-simplifier` (hard-coded TypeScript/React style) are replaced with "follow the project's own conventions". See [NOTICE](NOTICE) for the full list.
+- **Prompt patches (P1-P6):** project-specific rules in `silent-failure-hunter` (Sentry, Statsig, `errorIds.ts`) and `code-simplifier` (hard-coded TypeScript/React style) are replaced with "follow the project's own conventions", and `code-reviewer` also reviews staged changes by default. See [NOTICE](NOTICE) for the full list.
 
 ## Troubleshooting
 
-- **The skill does not load from a natural-language request.** Use `/skill:pr-review`.
-- **The parent refuses to launch subagents.** Invoke the skill explicitly, or add a line to your AGENTS.md such as: "The pr-review skill may launch its review subagents when I ask for a review."
+- **The parent refuses to launch subagents.** Add a line to your AGENTS.md such as: "/review-pr may launch its review subagents."
 - **`Unknown agent` or the agents are missing.** Run `/reload`. `subagent({ action: "doctor" })` reports discovery problems.
 - **Model resolution errors.** Use exact ids from `subagent({ action: "models" })` in `agentOverrides`.
 
@@ -115,4 +113,4 @@ subagent({ action: "eject", agent: "code-reviewer" })
 
 Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
-The agents and the `/review-pr` workflow are derived from Anthropic's pr-review-toolkit in [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit) at commit `30202c7`. Each derived file has a change notice at the top. This is not an official Anthropic package.
+The agents and the `/review-pr` command are derived from Anthropic's pr-review-toolkit in [anthropics/claude-plugins-official](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit) at commit `30202c7`. Each derived file has a change notice at the top. This is not an official Anthropic package.

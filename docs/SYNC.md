@@ -1,6 +1,6 @@
 # Upstream 동기화 절차
 
-이 패키지의 에이전트 6개와 `skills/pr-review/SKILL.md`는 upstream
+이 패키지의 에이전트 6개와 `prompts/review-pr.md`는 upstream
 `anthropics/claude-plugins-official`의 `plugins/pr-review-toolkit`에서 가져왔다.
 코드 없는 패키지를 유지하기 위해 동기화는 아래 절차를 손으로 따른다(plan D12).
 
@@ -41,7 +41,7 @@ git diff 30202c7..<new> -- plugins/pr-review-toolkit/agents plugins/pr-review-to
 | P3 | silent-failure-hunter | Your Tone의 "Call out every instance …"가 "evidence-backed … no speculative issues" 문구 |
 | P4 | code-simplifier | §2에 특정 스타일 목록(ES modules, `function` keyword, 반환 타입, React Props, try/catch 회피)이 없다. §5와 마지막 문단에 "current session", "autonomously and proactively"가 없다 |
 | P5 | code-reviewer | Review Scope가 `git diff`와 `git diff --cached`를 모두 언급 |
-| P6 | skills/pr-review/SKILL.md | 원문 그대로 + 프론트매터에 변경 고지 YAML 주석, `name: pr-review`, `allowed-tools`를 Pi 도구 이름(`bash, find, grep, read, subagent`)으로 변경 |
+| P6 | prompts/review-pr.md | 원문 그대로 + 프론트매터에 변경 고지 YAML 주석, `allowed-tools`를 Pi 도구 이름(`bash, find, grep, read, subagent`)으로 변경 |
 
 남은 사내 규칙 키워드 확인:
 
@@ -54,7 +54,7 @@ grep -nE 'errorIds|Sentry|Statsig|logForDebugging|logError|logEvent|function` ke
 
 ```bash
 for f in agents/*.md; do diff -u /tmp/cpo/plugins/pr-review-toolkit/$f $f; done
-diff -u /tmp/cpo/plugins/pr-review-toolkit/commands/review-pr.md skills/pr-review/SKILL.md
+diff -u /tmp/cpo/plugins/pr-review-toolkit/commands/review-pr.md prompts/review-pr.md
 ```
 
 ## 4. 기준 커밋 표기 갱신
@@ -66,7 +66,7 @@ diff -u /tmp/cpo/plugins/pr-review-toolkit/commands/review-pr.md skills/pr-revie
 - `CHANGELOG.md`에 새 버전 항목
 
 ```bash
-grep -rn '30202c7' agents skills NOTICE README.md docs/SYNC.md
+grep -rn '30202c7' agents prompts NOTICE README.md docs/SYNC.md
 ```
 
 ## 5. 검증 다시 돌리기
@@ -87,4 +87,4 @@ console.log("diagnostics:", r.agentDiagnostics.length);'
 기대값: 6줄. 리뷰어는 `read,grep,find,ls,bash high replace true false read-only -`,
 code-simplifier는 `...,edit,write high replace true false writer -`.
 
-스킬은 Pi에서 `/reload` 뒤 `/skill:pr-review`가 경고 없이 로드되는지 본다.
+프롬프트 템플릿은 Pi에서 `/reload` 뒤 `/review-pr`가 명령 목록에 나오는지 본다.

@@ -1,6 +1,6 @@
 ---
 name: pr-review
-description: Comprehensive PR and change review with the pr-review-toolkit subagents (code-reviewer, silent-failure-hunter, pr-test-analyzer, comment-analyzer, type-design-analyzer, code-simplifier), ported from Claude Code. Use when asked to review a pull request or recent changes, or to check test coverage, error handling, code comments, or type design before committing or opening a PR. Optional aspects are code, errors, tests, comments, types, simplify, and all; add "parallel" to run the reviewers concurrently.
+description: Comprehensive PR and change review with the pr-review-toolkit subagents (code-reviewer, silent-failure-hunter, pr-test-analyzer, comment-analyzer, type-design-analyzer, code-simplifier), ported from Claude Code. Use when asked to review a pull request or recent changes, or to check test coverage, error handling, code comments, or type design before committing or opening a PR. Optional aspects are code, errors, tests, comments, types, simplify, and all. Reviewers run in parallel by default; add "sequential" to run them one at a time.
 ---
 
 # PR Review (pr-review-toolkit for Pi)
@@ -30,7 +30,7 @@ Then list the changed files (`git diff --name-only`, `git diff --cached --name-o
 
 ### 2. Aspects and agent selection
 
-Parse the request for the aspects `code`, `errors`, `tests`, `comments`, `types`, `simplify`, and `all`, and for the modifier `parallel`. Map equivalent natural-language requests, in any language, to the same aspects.
+Parse the request for the aspects `code`, `errors`, `tests`, `comments`, `types`, `simplify`, and `all`, and for the modifiers `sequential` and `parallel` (the default). Map equivalent natural-language requests, in any language, to the same aspects.
 
 | Aspect | Agent |
 |---|---|
@@ -49,10 +49,10 @@ Parse the request for the aspects `code`, `errors`, `tests`, `comments`, `types`
 
 Use the `subagent` tool where the reference says "Task".
 
-- **Sequential (default):** launch one agent at a time with `subagent({ agent: "<name>", task: "<brief>", async: false })` and wait for each result before launching the next.
-- **Parallel (`parallel` requested):** launch all selected reviewers in one call:
+- **Parallel (default):** launch all selected reviewers in one call:
   `subagent({ workflow: "parallel", args: { tasks: [{ agent: "<name>", task: "<brief>" }, ...] } })`.
-  Results come back together. Wait for the completion notification; do not poll or sleep.
+  Results come back together. Wait for the completion notification; do not poll or sleep. If only one reviewer is selected, launch it directly with `subagent({ agent: "<name>", task: "<brief>" })`.
+- **Sequential (`sequential` requested):** launch one agent at a time with `subagent({ agent: "<name>", task: "<brief>", async: false })` and wait for each result before launching the next.
 - **`code-simplifier`** edits files, so it runs only when `simplify` was requested; alone, never inside a parallel batch; after any requested reviewers have finished; and only on the changed files in scope. Launch it with `async: false`. Afterwards, run `git status --short` and `git diff --stat` yourself, confirm that it changed only in-scope files, and report what changed.
 
 ### 4. Child briefs
@@ -96,5 +96,5 @@ Produce the "PR Review Summary" from step 7 of the reference, in the user's lang
 
 - **Verify:** before reporting a finding you doubt, read the cited code yourself. Drop findings that do not hold up, or mark them as unverified.
 - **Deduplicate:** merge the same issue reported by several agents into one entry and list all of them, for example `[code-reviewer, silent-failure-hunter]`.
-- **Failures:** if an agent fails (launch error, model resolution error, timeout), name it and the error in the summary, and continue with the others in sequential mode. Do not silently substitute another agent.
+- **Failures:** if an agent fails (launch error, model resolution error, timeout), name it and the error in the summary, and keep the results of the agents that completed. In parallel mode a failed child fails the whole batch, so relaunch only the failed agents once; in sequential mode continue with the next agent. Do not silently substitute another agent.
 - **No automatic fixes:** after the summary, ask whether to apply fixes and which. If `simplify` was not run, offer it.

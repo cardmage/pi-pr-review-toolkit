@@ -13,7 +13,7 @@ This package contains no code, only agent definitions, one skill, and documentat
 | `type-design-analyzer` | Type invariants and encapsulation | Four ratings, 1-10 each |
 | `code-simplifier` | Clarity and consistency, preserving behavior | **Edits files** in the given scope |
 
-> **한국어 요약:** Claude Code의 pr-review-toolkit 리뷰 에이전트 6개와 `/review-pr` 흐름을 Pi(pi-subagents)에서 쓰게 해 주는 패키지입니다. pi-subagents를 먼저 설치한 뒤 `pi install npm:pi-pr-review-toolkit`으로 설치하고, "PR 리뷰해줘" 또는 `/skill:pr-review`로 실행합니다. 기본은 순차 실행이고, `parallel`을 붙이면 병렬로 실행합니다. 리뷰어 5개는 읽기 전용이며, `code-simplifier`는 `simplify`를 요청했을 때만 바뀐 파일 범위 안에서 코드를 직접 고칩니다. 모델은 패키지에 고정되어 있지 않으므로 아래 "Recommended model settings"처럼 `agentOverrides`로 지정하세요.
+> **한국어 요약:** Claude Code의 pr-review-toolkit 리뷰 에이전트 6개와 `/review-pr` 흐름을 Pi(pi-subagents)에서 쓰게 해 주는 패키지입니다. pi-subagents를 먼저 설치한 뒤 `pi install npm:pi-pr-review-toolkit`으로 설치하고, "PR 리뷰해줘" 또는 `/skill:pr-review`로 실행합니다. 기본은 병렬 실행이고, `sequential`을 붙이면 하나씩 실행합니다. 리뷰어 5개는 읽기 전용이며, `code-simplifier`는 `simplify`를 요청했을 때만 바뀐 파일 범위 안에서 코드를 직접 고칩니다. 모델은 패키지에 고정되어 있지 않으므로 아래 "Recommended model settings"처럼 `agentOverrides`로 지정하세요.
 
 ## Requirements
 
@@ -46,14 +46,14 @@ The `pr-review` skill is the entry point. It reads the upstream `/review-pr` wor
 
 | You type | What runs |
 |---|---|
-| `Review this PR` / `PR 리뷰해줘` | Applicable reviewers, one at a time (if the skill loads automatically) |
+| `Review this PR` / `PR 리뷰해줘` | Applicable reviewers, in parallel (if the skill loads automatically) |
 | `/skill:pr-review` | Same, but forces the skill to load |
 | `/skill:pr-review tests errors` | Only `pr-test-analyzer` and `silent-failure-hunter` |
-| `/skill:pr-review all parallel` | All applicable reviewers at once |
+| `/skill:pr-review sequential` | Applicable reviewers, one at a time |
 | `/skill:pr-review simplify` | `code-simplifier` on the changed files (edits them) |
 | `/skill:pr-review code against main` | `code-reviewer` on `git diff main...HEAD` |
 
-Aspects: `code`, `errors`, `tests`, `comments`, `types`, `simplify`, `all` (default). Add `parallel` to run the selected reviewers concurrently.
+Aspects: `code`, `errors`, `tests`, `comments`, `types`, `simplify`, `all` (default). The selected reviewers run in parallel; add `sequential` to run them one at a time.
 
 **Scope.** In order of precedence: an explicit scope in your request (files, base ref, commit range, PR number); the current branch's PR when you ask about a PR and `gh` is available; otherwise uncommitted changes (`git diff` and `git diff --cached`).
 
@@ -102,7 +102,7 @@ subagent({ action: "eject", agent: "code-reviewer" })
 - **Invocation:** the agents are not advertised and Pi does not launch them proactively. Use the `pr-review` skill or ask for an agent by name. pi-subagents only delegates when you ask, and invoking the skill counts as asking.
 - **Project instructions:** agents receive the project's AGENTS.md/CLAUDE.md (`inheritProjectContext: true`), and "CLAUDE.md" in the prompts also means AGENTS.md.
 - **Tools:** reviewers get `read, grep, find, ls, bash`; `code-simplifier` also gets `edit, write`. Reviewers are told to use bash read-only. This is an instruction, not a sandbox.
-- **Workflow:** `code-simplifier` runs only when you ask for `simplify`, never as part of `all`. `pr-test-analyzer` also runs when logic changed without test changes. Staged changes are part of the default scope.
+- **Workflow:** reviewers run in parallel by default (upstream's text defaults to sequential, with `parallel` on request); use `sequential` for one at a time. `code-simplifier` runs only when you ask for `simplify`, never as part of `all`. `pr-test-analyzer` also runs when logic changed without test changes. Staged changes are part of the default scope.
 - **Prompt patches (P1-P6):** project-specific rules in `silent-failure-hunter` (Sentry, Statsig, `errorIds.ts`) and `code-simplifier` (hard-coded TypeScript/React style) are replaced with "follow the project's own conventions". See [NOTICE](NOTICE) for the full list.
 
 ## Troubleshooting

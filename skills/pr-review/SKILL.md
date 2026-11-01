@@ -1,10 +1,10 @@
 ---
 # Derived from anthropics/claude-plugins-official plugins/pr-review-toolkit/commands/review-pr.md @30202c7 (Apache-2.0).
-# Modified for Pi: this change notice and the `name` field were added; the rest is verbatim. See NOTICE.
+# Modified for Pi: this change notice and the `name` field were added, and allowed-tools renamed to Pi tools; the rest is verbatim. See NOTICE.
 name: pr-review
 description: "Comprehensive PR review using specialized agents"
 argument-hint: "[review-aspects]"
-allowed-tools: ["Bash", "Glob", "Grep", "Read", "Task"]
+allowed-tools: ["bash", "find", "grep", "read", "subagent"]
 ---
 
 # Comprehensive PR Review

@@ -63,7 +63,9 @@ All six agents:
       to unstaged and staged changes (`git diff` and `git diff --cached`).
 
   P6  skills/pr-review/SKILL.md: upstream command kept verbatim; only a
-      change notice and the skill `name` field were added to the frontmatter.
+      change notice and the skill `name` field were added to the frontmatter,
+      and `allowed-tools` was renamed to Pi tools (Bash, Glob, Grep, Read,
+      Task -> bash, find, grep, read, subagent).
 
 Files original to this package: README.md,
 CHANGELOG.md, NOTICE, package.json, and docs/. They are also licensed under the

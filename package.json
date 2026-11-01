@@ -1,0 +1,40 @@
+{
+  "name": "pi-pr-review-toolkit",
+  "version": "0.1.0",
+  "description": "Claude Code pr-review-toolkit review agents for Pi (pi-subagents): code-reviewer, silent-failure-hunter, pr-test-analyzer, comment-analyzer, type-design-analyzer, code-simplifier",
+  "keywords": [
+    "pi-package",
+    "pi",
+    "pi-subagents",
+    "code-review",
+    "pull-request",
+    "claude-code"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cardmage/pi-pr-review-toolkit.git"
+  },
+  "homepage": "https://github.com/cardmage/pi-pr-review-toolkit#readme",
+  "bugs": {
+    "url": "https://github.com/cardmage/pi-pr-review-toolkit/issues"
+  },
+  "files": [
+    "agents/",
+    "skills/",
+    "LICENSE",
+    "NOTICE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "pi": {
+    "skills": [
+      "./skills"
+    ],
+    "subagents": {
+      "agents": [
+        "./agents"
+      ]
+    }
+  }
+}

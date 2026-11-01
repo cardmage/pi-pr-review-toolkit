@@ -1,0 +1,72 @@
+pi-pr-review-toolkit
+Copyright 2026 pi-pr-review-toolkit contributors
+
+This product includes material derived from the "pr-review-toolkit" Claude Code
+plugin by Anthropic, published in anthropics/claude-plugins-official:
+
+  https://github.com/anthropics/claude-plugins-official/tree/main/plugins/pr-review-toolkit
+  Base commit: 30202c767cfaf325212b3921ab484f83adaec850 (2026-10-26)
+  License: Apache License, Version 2.0 (see LICENSE)
+
+The upstream README says "License: MIT", but the upstream LICENSE file is the
+Apache License 2.0. This package follows the Apache License 2.0. The upstream
+plugin ships no NOTICE file.
+
+Derived files
+-------------
+
+  agents/code-reviewer.md            <- plugins/pr-review-toolkit/agents/code-reviewer.md
+  agents/code-simplifier.md          <- plugins/pr-review-toolkit/agents/code-simplifier.md
+  agents/comment-analyzer.md         <- plugins/pr-review-toolkit/agents/comment-analyzer.md
+  agents/pr-test-analyzer.md         <- plugins/pr-review-toolkit/agents/pr-test-analyzer.md
+  agents/silent-failure-hunter.md    <- plugins/pr-review-toolkit/agents/silent-failure-hunter.md
+  agents/type-design-analyzer.md     <- plugins/pr-review-toolkit/agents/type-design-analyzer.md
+  skills/pr-review/references/review-pr.md
+                                     <- plugins/pr-review-toolkit/commands/review-pr.md
+
+Each derived file carries a change notice in YAML comments at the top of its
+frontmatter.
+
+Changes made to the derived files
+---------------------------------
+
+All six agents:
+  - Frontmatter replaced for Pi (pi-subagents): a one-line description; the
+    `model` and `color` fields removed; `tools`, `thinking: high`,
+    `systemPromptMode: replace`, `inheritProjectContext: true`,
+    `inheritSkills: false`, and `acceptanceRole` added.
+
+  P1  A "Pi runtime notes" section appended to every agent: CLAUDE.md
+      references also mean AGENTS.md; the review scope comes from the task,
+      falling back to `git diff` and `git diff --cached`; every finding cites
+      file:line and evidence; reviewers are read-only (bash for inspection
+      only; no edits, commits, pushes, or PR comments). code-simplifier gets
+      an edit boundary limited to the task's scope instead.
+
+  P2  silent-failure-hunter: references to project-specific logging and
+      error-tracking (logError, logForDebugging, logEvent, constants/errorIds.ts,
+      Sentry, Statsig) replaced with the project's own conventions from
+      AGENTS.md/CLAUDE.md, if any. "Special Considerations" made
+      project-neutral.
+
+  P3  silent-failure-hunter: "Call out every instance ... no matter how minor"
+      changed to report every evidence-backed instance within the review scope
+      and no speculative issues.
+
+  P4  code-simplifier: the hard-coded style list (ES modules, `function`
+      keyword, explicit return types, React Props types, avoiding try/catch)
+      replaced with "follow AGENTS.md/CLAUDE.md, otherwise match the
+      surrounding code". "Recently modified ... in the current session" and
+      "operate autonomously and proactively" replaced with "only the scope
+      specified in the task, and only when asked".
+
+  P5  code-reviewer: default scope changed from unstaged changes (`git diff`)
+      to unstaged and staged changes (`git diff` and `git diff --cached`).
+
+  P6  skills/pr-review/references/review-pr.md: upstream command kept
+      verbatim; only a change notice and a note that the Pi adaptation rules
+      in SKILL.md take precedence were added.
+
+Files original to this package: skills/pr-review/SKILL.md, README.md,
+CHANGELOG.md, NOTICE, package.json, and docs/. They are also licensed under the
+Apache License 2.0.

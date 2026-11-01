@@ -1,6 +1,6 @@
 # Upstream 동기화 절차
 
-이 패키지의 에이전트 6개와 `skills/pr-review/references/review-pr.md`는 upstream
+이 패키지의 에이전트 6개와 `skills/pr-review/SKILL.md`는 upstream
 `anthropics/claude-plugins-official`의 `plugins/pr-review-toolkit`에서 가져왔다.
 코드 없는 패키지를 유지하기 위해 동기화는 아래 절차를 손으로 따른다(plan D12).
 
@@ -41,7 +41,7 @@ git diff 30202c7..<new> -- plugins/pr-review-toolkit/agents plugins/pr-review-to
 | P3 | silent-failure-hunter | Your Tone의 "Call out every instance …"가 "evidence-backed … no speculative issues" 문구 |
 | P4 | code-simplifier | §2에 특정 스타일 목록(ES modules, `function` keyword, 반환 타입, React Props, try/catch 회피)이 없다. §5와 마지막 문단에 "current session", "autonomously and proactively"가 없다 |
 | P5 | code-reviewer | Review Scope가 `git diff`와 `git diff --cached`를 모두 언급 |
-| P6 | references/review-pr.md | 원문 그대로 + 맨 위 변경 고지 YAML 주석 + `> **Pi note:**` 한 줄 |
+| P6 | skills/pr-review/SKILL.md | 원문 그대로 + 프론트매터에 변경 고지 YAML 주석과 `name: pr-review` |
 
 남은 사내 규칙 키워드 확인:
 
@@ -54,7 +54,7 @@ grep -nE 'errorIds|Sentry|Statsig|logForDebugging|logError|logEvent|function` ke
 
 ```bash
 for f in agents/*.md; do diff -u /tmp/cpo/plugins/pr-review-toolkit/$f $f; done
-diff -u /tmp/cpo/plugins/pr-review-toolkit/commands/review-pr.md skills/pr-review/references/review-pr.md
+diff -u /tmp/cpo/plugins/pr-review-toolkit/commands/review-pr.md skills/pr-review/SKILL.md
 ```
 
 ## 4. 기준 커밋 표기 갱신

@@ -21,8 +21,7 @@ Derived files
   agents/pr-test-analyzer.md         <- plugins/pr-review-toolkit/agents/pr-test-analyzer.md
   agents/silent-failure-hunter.md    <- plugins/pr-review-toolkit/agents/silent-failure-hunter.md
   agents/type-design-analyzer.md     <- plugins/pr-review-toolkit/agents/type-design-analyzer.md
-  skills/pr-review/references/review-pr.md
-                                     <- plugins/pr-review-toolkit/commands/review-pr.md
+  skills/pr-review/SKILL.md          <- plugins/pr-review-toolkit/commands/review-pr.md
 
 Each derived file carries a change notice in YAML comments at the top of its
 frontmatter.
@@ -63,10 +62,9 @@ All six agents:
   P5  code-reviewer: default scope changed from unstaged changes (`git diff`)
       to unstaged and staged changes (`git diff` and `git diff --cached`).
 
-  P6  skills/pr-review/references/review-pr.md: upstream command kept
-      verbatim; only a change notice and a note that the Pi adaptation rules
-      in SKILL.md take precedence were added.
+  P6  skills/pr-review/SKILL.md: upstream command kept verbatim; only a
+      change notice and the skill `name` field were added to the frontmatter.
 
-Files original to this package: skills/pr-review/SKILL.md, README.md,
+Files original to this package: README.md,
 CHANGELOG.md, NOTICE, package.json, and docs/. They are also licensed under the
 Apache License 2.0.

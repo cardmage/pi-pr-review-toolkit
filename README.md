@@ -42,7 +42,7 @@ Check that the agents are registered: `/subagents`, or ask the agent to run `sub
 
 ## Usage
 
-The `pr-review` skill is the entry point. It reads the upstream `/review-pr` workflow and applies Pi-specific rules on top.
+The `pr-review` skill is the entry point. It is the upstream `/review-pr` command, verbatim.
 
 | You type | What runs |
 |---|---|
